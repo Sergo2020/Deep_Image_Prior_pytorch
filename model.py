@@ -13,12 +13,7 @@ class Unet(nn.Module):
         self.inp_ch = inp_ch
         self.depth = depth
         self.arch = arch
-
-        if concat is None:
-            self.concat = [1]*self.depth
-        else:
-            self.concat = 2*concat
-            self.concat[self.concat == 0] = 1
+        self.concat = None
 
         self.arch_n = []
         self.enc = []
@@ -26,9 +21,25 @@ class Unet(nn.Module):
         self.layers = []
         self.skip = []
 
+        self.check_concat(concat)
         self.prep_arch_list()
         self.organize_arch()
         self.prep_params()
+
+    def check_concat(self, con):
+        if con is None:
+            self.concat = [1]*self.depth
+        elif len(con) > self.depth:
+            self.concat = con[:self.depth]
+            self.concat = 2 * con
+            self.concat[self.concat == 0] = 1
+        elif len(con) < self.depth:
+            self.concat = con + [0]*(self.depth - len(con))
+            self.concat = 2 * con
+            self.concat[self.concat == 0] = 1
+        else:
+            self.concat = 2*con
+            self.concat[self.concat == 0] = 1
 
     def prep_arch_list(self):
         for dl in range(0, self.depth + 1):
@@ -82,7 +93,6 @@ class Unet(nn.Module):
 
 # ----------------Test---------------------------
 
-
 if __name__ == '__main__':
     import torch
 
@@ -95,11 +105,3 @@ if __name__ == '__main__':
 
     net = Unet(device, 16, 3, 16, 4).to(device)
     y = net(x)
-
-    # for name, param in net.named_parameters():
-    #     if param.requires_grad:
-    #         print(name)
-    #
-    # list = net.retriev_params()
-    # print(list)
-
