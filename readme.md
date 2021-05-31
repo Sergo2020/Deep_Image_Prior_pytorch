@@ -9,7 +9,11 @@ For additional please refer to source repository [2].
 
 <h3>Instructions</h3>
 
---> **Under construction**
+Check [requirments.txt]() and run main.py. You may specify task ('jpeg', 'denoise' or 'inpaint') and image location. 
+Program will result two images - original and proccessed, and a plot of loss values during the training.
+
+Examples of inpainting and denoisign below:
+
 
 <h3>References</h3>
 
