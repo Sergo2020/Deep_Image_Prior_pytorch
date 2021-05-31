@@ -7,10 +7,9 @@ import trainer as tr
 from utils import *
 
 
-def train(img_path, image_res, hyper_pars,
+def train(img_path, image_res, check_dir, hyper_pars,
           task=None, mask_path=None, load_path=None):
 
-    check_dir = f'check_point/'
 
     check_existence(check_dir, True)
     check_existence(image_res, True)
@@ -25,7 +24,7 @@ def train(img_path, image_res, hyper_pars,
         mask = mask.to(hyper_pars['Device'])
 
     elif task == 'denoise':
-        img = data.add_noise(img, std=0.2)
+        img = data.add_noise(img, std=0.05)
         tr.save_image(img[0], image_res / 'ref_img.png')
     elif task == 'jpeg':
         tr.save_image(img[0], image_res / 'ref_img.png')
@@ -64,43 +63,39 @@ def train(img_path, image_res, hyper_pars,
 
         if (ep % hyper['Factor']) == 0:
             if ep > 0:
-                trainer.plot_loss(ep)
-
-                if task == 'filter':
-                    trainer.save_out(out, ep)
-                else:
-                    trainer.save_out(out, ep)
-                trainer.Save_Model(check_dir + '/chk_' + str(ep) + '.pt')
+                trainer.save_out(out, image_res, f'{img_path.stem}_ep{ep}')
+                trainer.save_model(check_dir / ('/chk_' + str(ep) + '.pt'))
 
         pbar.postfix = f'Loss {trainer.train_g_loss[- 1]:.5f}'
 
-    trainer.save_model(check_dir + '/chk_last.pt', True)
+    trainer.plot_loss()
+    trainer.save_model(check_dir / ('chk_' + str(hyper_pars['Epochs']) + '.pt'), True)
     torch.cuda.empty_cache()
 
 
 if __name__ == '__main__':
 
-    proj_path = get_curr_path()
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-i", "--im_path", default=proj_path + r"\images\car.png", required=False)
-    parser.add_argument("-i", "--msk_path", default=proj_path + r"\images\car_mask.png", required=False)
-    parser.add_argument("-d", "--dest_path", default=proj_path + r"\results", required=False)
-    parser.add_argument("-c", "--check_path", default=proj_path + r"\check_points", required=False)
+    parser.add_argument("-i", "--im_path", default= Path.cwd() / r"\images\car.png", required=False)
+    parser.add_argument("-m", "--msk_path", default= Path.cwd() / r"\images\car_mask.png", required=False)
+    parser.add_argument("-d", "--dest_path", default= Path.cwd() / r"\results", required=False)
+    parser.add_argument("-c", "--check_path", default= Path.cwd() / r"\check_points", required=False)
     parser.add_argument("-e", "--epochs", type=int, default=700, required=False)
     parser.add_argument("-ch", "--channels", type=int, default=16, required=False)
     parser.add_argument("-lr", "--learning_rate", type=float, default=1e-3, required=False)
-    parser.add_argument("-hd", "--hidden_dim", type=int, default=128, required=False)
+    parser.add_argument("-a", "--arch", type=int, default=16, required=False)
+    parser.add_argument("-dh", "--depth", type=int, default=4, required=False)
+    parser.add_argument("-n", "--noise", type=str, default='uniform', required=False)
+    parser.add_argument("-t", "--task", type=str, default='denoise', required=False)
 
     args = parser.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # TODO: add task selector
-    # TODO: add noise selector
-    hyper = {'Epochs': 1000, 'Factor' : 100, 'Noise type': 'uniform',
-             'LR': 1e-3, 'Device': device, 'Weights Decay': 0.0,
-             'Inp. Channel': 16, 'Out. Channel': 3, 'Arch.': 16, 'Depth': 4,
-             'Concat': [1, 0, 0, 1], 'Image folder': Path(args.dest_path)}
+    hyper = {'Epochs': args.epochs, 'Factor' : 100, 'Noise type': args.noise,
+             'LR': args.learning_rate, 'Device': device,
+             'Inp. Channel': 16, 'Out. Channel': 3, 'Arch.': args.arch, 'Depth': args.depth,
+             'Concat': [0, 1, 1, 0]}
 
-    img_out = train(Path(args.im_path), Path(args.dest_path), hyper,
-                    mask_path=Path(args.msk_path), task='inpaint')
+    img_out = train(Path(args.im_path), Path(args.dest_path), Path(args.check_path),
+                    hyper, mask_path=Path(args.msk_path), task=args.task)

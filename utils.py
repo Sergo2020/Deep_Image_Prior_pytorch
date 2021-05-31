@@ -16,10 +16,6 @@ def check_existence(path, create=False):
         else:
             exit()
 
-
-def get_curr_path():
-    return os.getcwd()
-
 def crop_from_points(img_dim, crop_size, overlap=0):  # Overlap in ratio to crop size
     points = [0]
     stride = int(crop_size * (1 - overlap))

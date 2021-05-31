@@ -66,6 +66,6 @@ def init_dummy(noise_type, img_dims, ch_n, var=0.1):
     return img
 
 
-def add_noise(img_tensor, mean=0.0, std=1.0):
+def add_noise(img_tensor, mean=0.0, std=0.1):
     img_tensor += torch.randn(img_tensor.size()) * std + mean
     return torch.clip(img_tensor, 0.0, 1.0).type(torch.float)

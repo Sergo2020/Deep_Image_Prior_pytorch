@@ -16,8 +16,6 @@ class Trainer(nn.Module):
         # Hyperparameters
         self.device = hyperparams['Device']
         self.init_lr = hyperparams['LR']
-        self.imag_path = hyperparams['Image folder']
-        self.weight_decay = hyperparams['Weights Decay']
         self.ch_i = hyperparams['Inp. Channel']
         self.ch_o = hyperparams['Out. Channel']
         self.arch = hyperparams['Arch.']
@@ -28,17 +26,16 @@ class Trainer(nn.Module):
         self.noise = None
 
         # Model initialization
-        self.loss = nn.MSELoss(reduction  = 'mean').to(self.device)
+        self.loss = nn.MSELoss(reduction='mean').to(self.device)
         self.AE = model.Unet(self.device, self.ch_i, self.ch_o, self.arch,
-                             activ = 'leak', depth=self.depth, concat=self.concat).to(self.device)
-        self.optimizer = optim.AdamW(self.AE.parameters(),
-                                     lr=self.init_lr, weight_decay=self.weight_decay)
+                             activ='leak', depth=self.depth, concat=self.concat).to(self.device)
+        self.optimizer = optim.AdamW(self.AE.parameters(), lr=self.init_lr)
 
     def init_train(self, noise, var):
         self.noise = noise
         self.var = var
 
-    def prep_noise(self, var = -1):
+    def prep_noise(self, var=-1):
         if var == -1:
             return self.noise + torch.randn_like(self.noise.detach()) * self.var
         else:
@@ -69,26 +66,25 @@ class Trainer(nn.Module):
         dmy = self.prep_noise()
 
         out = self.AE(dmy)
-        loss = self.loss(out*mask, corrupt_img*mask)
+        loss = self.loss(out * mask, corrupt_img * mask)
 
         loss.backward()
         self.optimizer.step()
 
         self.train_g_loss.append(loss.item())
 
-        return out.detach()
+        return out.detach().cpu()
 
-    def save_out(self, out_put, it):
-        save_image(out_put, self.imag_path / f'epoch_{it}.png')
+    @staticmethod
+    def save_out(out_put, dir, fl_name):
+        save_image(out_put, dir / (fl_name + ".png"))
 
     def test_save(self, dummy, it):
         self.AE.eval()
         out = self.AE(dummy)
         self.save_out(out, it)
 
-    def plot_loss(self, eps):
-        if eps == 0:
-            eps = 1
+    def plot_loss(self):
         plt.figure(figsize=(10, 6))
         plt.title('Loss')
         plt.plot(np.arange(1, len(self.train_g_loss) + 1), self.train_g_loss, label='MSE', c='g')
@@ -98,7 +94,7 @@ class Trainer(nn.Module):
         plt.ylabel('Mean Sample Loss')
         plt.show()
 
-    def save_model(self, path, full_model = False):
+    def save_model(self, path, full_model=False):
 
         if not full_model:
             data_dict = {'G state': self.AE.state_dict(),
@@ -114,6 +110,3 @@ class Trainer(nn.Module):
         self.train_g_loss = data_dict['Train G Loss']
 
         return len(self.train_g_loss)
-
-
-
