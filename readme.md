@@ -9,7 +9,29 @@ For additional please refer to source repository [2].
 
 <h3>Instructions</h3>
 
---> **Under construction**
+Check [requirments.txt](https://github.com/Sergo2020/Deep_Image_Prior_pytorch/blob/master/requirements.txt) and run main.py. You may specify task ('jpeg', 'denoise' or 'inpaint') and image location. 
+Program will result two images - original and proccessed, and a plot of loss values during the training.
+
+Examples of inpainting and denoisign below:
+
+<p align="center">
+  <strong> Denoising </strong>
+</p>
+
+<p align="center">
+  <img src="https://github.com/Sergo2020/Deep_Image_Prior_pytorch/blob/master/results/doge_noise.png" width="40%"  alt="Noisy doge" />
+  <img src="https://github.com/Sergo2020/Deep_Image_Prior_pytorch/blob/master/results/doge_denoised.png" width="40%" alt="Doge denoised" />
+</p>
+<p align="center">
+  <hr size="0" width="100%"> 
+</p>
+<p align="center">
+  <strong> Inpainting </strong>
+</p>
+<p align="center">
+  <img src="https://github.com/Sergo2020/Deep_Image_Prior_pytorch/blob/master/results/car_paint.png" width="40%"  alt="Scratched car" />
+  <img src="https://github.com/Sergo2020/Deep_Image_Prior_pytorch/blob/master/results/car_clean.png" width="40%"  alt="Car" />
+</p>
 
 <h3>References</h3>
 
