@@ -67,7 +67,7 @@ def train(img_path, image_res, check_dir, hyper_pars,
         if (ep % hyper['Factor']) == 0:
             if ep > 0:
                 trainer.save_out(out, image_res, f'{img_path.stem}_ep{ep}')
-                trainer.save_model(check_dir / ('/chk_' + str(ep) + '.pt'))
+                trainer.save_model(check_dir / ('chk_' + str(ep) + '.pt'))
 
         pbar.postfix = f'Loss {trainer.train_g_loss[- 1]:.5f}'
 
