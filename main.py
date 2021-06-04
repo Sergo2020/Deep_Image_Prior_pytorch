@@ -10,8 +10,6 @@ from utils import *
 
 def train(img_path, image_res, check_dir, hyper_pars,
           task=None, mask_path=None, load_path=None):
-
-
     check_existence(check_dir, True)
     check_existence(image_res, True)
     check_existence(img_path, False)
@@ -31,7 +29,6 @@ def train(img_path, image_res, check_dir, hyper_pars,
         tr.save_image(img[0], image_res / 'ref_img.png')
     elif task == 'jpeg':
         tr.save_image(img[0], image_res / 'ref_img.png')
-
 
     dmy, img = dmy.to(hyper_pars['Device']), img.to(hyper_pars['Device'])
 
@@ -66,24 +63,23 @@ def train(img_path, image_res, check_dir, hyper_pars,
 
         if (ep % hyper['Factor']) == 0:
             if ep > 0:
-                trainer.save_out(out, image_res, f'{img_path.stem}_ep{ep}')
                 trainer.save_model(check_dir / ('chk_' + str(ep) + '.pt'))
 
         pbar.postfix = f'Loss {trainer.train_g_loss[- 1]:.5f}'
 
+    trainer.save_out(out, image_res, f"{img_path.stem}_ep{hyper['Epochs']}")
     trainer.plot_loss()
     trainer.save_model(check_dir / ('chk_' + str(hyper_pars['Epochs']) + '.pt'), True)
     torch.cuda.empty_cache()
 
 
 if __name__ == '__main__':
-
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-i", "--im_path", default= (Path.cwd() / r"images\car.png"), required=False)
-    parser.add_argument("-m", "--msk_path", default= (Path.cwd() / r"images\car_mask.png"), required=False)
-    parser.add_argument("-d", "--dest_path", default= (Path.cwd() / r"results"), required=False)
-    parser.add_argument("-c", "--check_path", default= (Path.cwd() / r"check_points"), required=False)
+    parser.add_argument("-i", "--im_path", default=(Path.cwd() / r"images\car.png"), required=False)
+    parser.add_argument("-m", "--msk_path", default=(Path.cwd() / r"images\car_mask.png"), required=False)
+    parser.add_argument("-d", "--dest_path", default=(Path.cwd() / r"results"), required=False)
+    parser.add_argument("-c", "--check_path", default=(Path.cwd() / r"check_points"), required=False)
     parser.add_argument("-e", "--epochs", type=int, default=700, required=False)
     parser.add_argument("-ch", "--channels", type=int, default=16, required=False)
     parser.add_argument("-lr", "--learning_rate", type=float, default=1e-3, required=False)
@@ -95,11 +91,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    hyper = {'Epochs': args.epochs, 'Factor' : 100, 'Noise type': args.noise,
+    hyper = {'Epochs': args.epochs, 'Factor': 100, 'Noise type': args.noise,
              'LR': args.learning_rate, 'Device': device,
              'Inp. Channel': 16, 'Out. Channel': 3, 'Arch.': args.arch, 'Depth': args.depth,
              'Concat': [0, 1, 1, 0]}
 
     img_out = train(Path(args.im_path), Path(args.dest_path), Path(args.check_path),
                     hyper, mask_path=Path(args.msk_path), task=args.task)
-
