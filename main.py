@@ -1,6 +1,7 @@
 from pathlib import Path
 import argparse
 from tqdm import tqdm
+import pickle
 
 import data as data
 import trainer as tr
@@ -14,6 +15,8 @@ def train(img_path, image_res, check_dir, hyper_pars,
     check_existence(check_dir, True)
     check_existence(image_res, True)
     check_existence(img_path, False)
+
+    pickle.dump(hyper, open((check_dir / 'train_hypers.pt'), 'wb'))
 
     dmy, img = data.prep_io(img_path, hyper_pars['Inp. Channel'],
                             hyper_pars['Depth'], 'uniform')
@@ -77,10 +80,10 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-i", "--im_path", default= Path.cwd() / r"\images\car.png", required=False)
-    parser.add_argument("-m", "--msk_path", default= Path.cwd() / r"\images\car_mask.png", required=False)
-    parser.add_argument("-d", "--dest_path", default= Path.cwd() / r"\results", required=False)
-    parser.add_argument("-c", "--check_path", default= Path.cwd() / r"\check_points", required=False)
+    parser.add_argument("-i", "--im_path", default= (Path.cwd() / r"images\car.png"), required=False)
+    parser.add_argument("-m", "--msk_path", default= (Path.cwd() / r"images\car_mask.png"), required=False)
+    parser.add_argument("-d", "--dest_path", default= (Path.cwd() / r"results"), required=False)
+    parser.add_argument("-c", "--check_path", default= (Path.cwd() / r"check_points"), required=False)
     parser.add_argument("-e", "--epochs", type=int, default=700, required=False)
     parser.add_argument("-ch", "--channels", type=int, default=16, required=False)
     parser.add_argument("-lr", "--learning_rate", type=float, default=1e-3, required=False)
@@ -99,3 +102,4 @@ if __name__ == '__main__':
 
     img_out = train(Path(args.im_path), Path(args.dest_path), Path(args.check_path),
                     hyper, mask_path=Path(args.msk_path), task=args.task)
+

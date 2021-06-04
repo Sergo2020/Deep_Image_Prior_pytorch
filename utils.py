@@ -14,6 +14,7 @@ def check_existence(path, create=False):
         if create:
             os.mkdir(path)
         else:
+            print(f'{str(path)}\nPath not found')
             exit()
 
 def crop_from_points(img_dim, crop_size, overlap=0):  # Overlap in ratio to crop size
