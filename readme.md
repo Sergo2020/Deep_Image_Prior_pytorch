@@ -10,7 +10,7 @@ For additional please refer to source repository [2].
 <h3>Instructions</h3>
 
 Check [requirments.txt](https://github.com/Sergo2020/Deep_Image_Prior_pytorch/blob/master/requirements.txt) and run main.py. You may specify task ('jpeg', 'denoise' or 'inpaint') and image location. 
-Program will result two images - original and proccessed, and a plot of loss values during the training.
+Program will result in two images - original and proccessed. Plot of loss values during the training will also appear.
 
 Examples of inpainting and denoisign below:
 
